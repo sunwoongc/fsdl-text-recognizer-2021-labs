@@ -92,7 +92,7 @@ python3 training/run_experiment.py --model_class=CNN --data_class=EMNIST --max_e
 ## Speeding up training
 
 One way we can make sure that our GPU stays consistently highly utilized is to do data pre-processing in separate worker processes, using the `--num_workers=X` flag.
-
+*(GPU should wait for the batch of data to be loaded on CPU, and it's waste of time.)*
 ```sh
 python3 training/run_experiment.py --model_class=CNN --data_class=EMNIST --max_epochs=5 --gpus=1 --num_workers=4
 ```
