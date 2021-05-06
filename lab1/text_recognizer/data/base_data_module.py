@@ -50,7 +50,7 @@ class BaseDataModule(pl.LightningDataModule):
         self.args = vars(args) if args is not None else {}
         self.batch_size = self.args.get("batch_size", BATCH_SIZE)
         self.num_workers = self.args.get("num_workers", NUM_WORKERS)
-
+        # subsample_fractions.
         self.on_gpu = isinstance(self.args.get("gpus", None), (str, int))
 
         # Make sure to set the variables below in subclasses
@@ -73,6 +73,12 @@ class BaseDataModule(pl.LightningDataModule):
         parser.add_argument(
             "--num_workers", type=int, default=NUM_WORKERS, help="Number of additional processes to load data."
         )
+#         parser.add_argument(
+#             "--subsample_fraction",
+#             type=float,
+#             default=None,
+#             help="If given, is used as the fraction of data to expose."
+#         )
         return parser
 
     def config(self):
