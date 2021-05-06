@@ -17,7 +17,7 @@ opener.addheaders = [("User-agent", "Mozilla/5.0")]
 urllib.request.install_opener(opener)
 
 
-class MNIST(BaseDataModule):
+class MNIST(BaseDataModule): ## BaseDataModule inherit pytorch lightning Datamodule: Basic interface for presenting data to the training system.
     """
     MNIST DataModule.
     Learn more at https://pytorch-lightning.readthedocs.io/en/stable/extensions/datamodules.html
@@ -33,13 +33,13 @@ class MNIST(BaseDataModule):
 
     def prepare_data(self, *args, **kwargs) -> None:
         """Download train and test MNIST data from PyTorch canonical source."""
-        TorchMNIST(self.data_dir, train=True, download=True)
-        TorchMNIST(self.data_dir, train=False, download=True)
+        TorchMNIST(self.data_dir, train=True, download=True) # Train
+        TorchMNIST(self.data_dir, train=False, download=True) # Test
 
-    def setup(self, stage=None) -> None:
+    def setup(self, stage=None) -> None: ## Processing data. ex: float64 -> 16bit, ...
         """Split into train, val, test, and set dims."""
         mnist_full = TorchMNIST(self.data_dir, train=True, transform=self.transform)
-        self.data_train, self.data_val = random_split(mnist_full, [55000, 5000])  # type: ignore
+        self.data_train, self.data_val = random_split(mnist_full, [55000, 5000])  # type: ignore ## splits
         self.data_test = TorchMNIST(self.data_dir, train=False, transform=self.transform)
 
 
