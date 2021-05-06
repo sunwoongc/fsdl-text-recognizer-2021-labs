@@ -11,6 +11,12 @@ from tqdm import tqdm
 import numpy as np
 import smart_open
 
+## 403 HTTP Error Solution: https://github.com/full-stack-deep-learning/fsdl-text-recognizer-2021-labs/issues/15
+from six.moves import urllib
+opener = urllib.request.build_opener()
+opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+urllib.request.install_opener(opener)
+
 
 def to_categorical(y, num_classes):
     """1-hot encode a tensor."""
