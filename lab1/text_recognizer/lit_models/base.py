@@ -2,7 +2,7 @@ import argparse
 import pytorch_lightning as pl
 import torch
 
-
+## Pytorch does not have 'fit' method. Pytorch lightning has nice framework.
 OPTIMIZER = "Adam"
 LR = 1e-3
 LOSS = "cross_entropy"
@@ -72,7 +72,7 @@ class BaseLitModel(pl.LightningModule):  # pylint: disable=too-many-ancestors
     def forward(self, x):
         return self.model(x)
 
-    def training_step(self, batch, batch_idx):  # pylint: disable=unused-argument
+    def training_step(self, batch, batch_idx):  # pylint: disable=unused-argument ## Enable Data parallel training without any further effort.
         x, y = batch
         logits = self(x)
         loss = self.loss_fn(logits, y)
