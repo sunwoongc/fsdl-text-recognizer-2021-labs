@@ -11,7 +11,7 @@ FC_DIM = 128
 IMAGE_SIZE = 28
 
 
-class ConvBlock(nn.Module):
+class ConvBlock(nn.Module): ## itself is a model, and it can be used as some part of model too (in CNN)
     """
     Simple 3x3 conv with padding size 1 (to leave the input size unchanged), followed by a ReLU.
     """
