@@ -72,7 +72,7 @@ class EMNIST(BaseDataModule):
                 self.y_test = f["y_test"][:].squeeze().astype(int)
             self.data_test = BaseDataset(self.x_test, self.y_test, transform=self.transform)
 
-    def __repr__(self):
+    def __repr__(self): ## print it!
         basic = f"EMNIST Dataset\nNum classes: {len(self.mapping)}\nMapping: {self.mapping}\nDims: {self.dims}\n"
         if self.data_train is None and self.data_val is None and self.data_test is None:
             return basic
