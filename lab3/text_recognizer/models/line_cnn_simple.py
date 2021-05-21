@@ -12,7 +12,6 @@ WINDOW_STRIDE = 28
 
 
 class LineCNNSimple(nn.Module):
-    """LeNet based model that takes a line of width that is a multiple of CHAR_WIDTH."""
 
     def __init__(
         self,
@@ -28,14 +27,14 @@ class LineCNNSimple(nn.Module):
 
         self.num_classes = len(data_config["mapping"])
         self.output_length = data_config["output_dims"][0]
-        self.cnn = CNN(data_config=data_config, args=args)
+        self.cnn = CNN(data_config=data_config, args=args) # Instantiate CNN used in Lec 2
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Parameters
         ----------
         x
-            (B, C, H, W) input image
+            (B, C, H, W) input image ( H =/ W ) greyscale C = 1
 
         Returns
         -------
@@ -48,7 +47,7 @@ class LineCNNSimple(nn.Module):
         assert H == IMAGE_SIZE  # Make sure we can use our CNN class
 
         # Compute number of windows
-        S = math.floor((W - self.WW) / self.WS + 1)
+        S = math.floor((W - self.WW) / self.WS + 1) # window width, window stride [CONV NET MATH]
 
         # NOTE: type_as properly sets device
         activations = torch.zeros((B, self.num_classes, S)).type_as(x)
@@ -56,7 +55,7 @@ class LineCNNSimple(nn.Module):
             start_w = self.WS * s
             end_w = start_w + self.WW
             window = x[:, :, :, start_w:end_w]  # -> (B, C, H, self.WW)
-            activations[:, :, s] = self.cnn(window)
+            activations[:, :, s] = self.cnn(window) # Too many computations when using largely overlapping window => fully convolutional layer => line_cnn.py
 
         if self.limit_output_length:
             # S might not match ground truth, so let's only take enough activations as are expected
