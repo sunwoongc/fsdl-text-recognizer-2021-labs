@@ -73,21 +73,30 @@ class LineCNN(nn.Module):
         self.limit_output_length = self.args.get("limit_output_length", False)
 
         # Input is (1, H, W)
-        self.convs = nn.Sequential(
-            ConvBlock(1, conv_dim),
-            ConvBlock(conv_dim, conv_dim),
-            ConvBlock(conv_dim, conv_dim, stride=2),
-            ConvBlock(conv_dim, conv_dim),
-            ConvBlock(conv_dim, conv_dim * 2, stride=2),
-            ConvBlock(conv_dim * 2, conv_dim * 2),
-            ConvBlock(conv_dim * 2, conv_dim * 4, stride=2),
-            ConvBlock(conv_dim * 4, conv_dim * 4),
-            ConvBlock(
-                conv_dim * 4, fc_dim, kernel_size=(H // 8, self.WW // 8), stride=(H // 8, self.WS // 8), padding=0
-            ),
-        )
+#         self.convs = nn.Sequential(
+#             ConvBlock(1, conv_dim),
+#             ConvBlock(conv_dim, conv_dim),
+#             ConvBlock(conv_dim, conv_dim, stride=2),
+#             ConvBlock(conv_dim, conv_dim),
+#             ConvBlock(conv_dim, conv_dim * 2, stride=2),
+#             ConvBlock(conv_dim * 2, conv_dim * 2),
+#             ConvBlock(conv_dim * 2, conv_dim * 4, stride=2),
+#             ConvBlock(conv_dim * 4, conv_dim * 4),
+#             ConvBlock(
+#                 conv_dim * 4, fc_dim, kernel_size=(H // 8, self.WW // 8), stride=(H // 8, self.WS // 8), padding=0
+#             ),
+#         )
+#       Comment out the original github and update based on lecture.
+        self.conv1 = ConvBlock(1, conv_dim)
+        self.conv2 = ConvBlock(conv_dim, conv_dim)
+        self.conv3 = ConvBlock(conv_dim, conv_dim, stride=2)
+        # Conv math! https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
+        # OW = torch.floor((W // 2 - WW // 2) + 1 )
+        self.conv4 = ConvBlock(conv_dim, fc_dim, kernel_size=(H // 2, self.WW // 2), stride = (H // 2,
+                                                                                               self.WS//2))
+        self.dropout = nn.Dropout(0.25)
         self.fc1 = nn.Linear(fc_dim, fc_dim)
-        self.dropout = nn.Dropout(0.2)
+#         self.dropout = nn.Dropout(0.2)
         self.fc2 = nn.Linear(fc_dim, self.num_classes)
 
         self._init_weights()
@@ -128,7 +137,13 @@ class LineCNN(nn.Module):
             C is self.num_classes
         """
         _B, _C, _H, _W = x.shape
-        x = self.convs(x)  # (B, FC_DIM, 1, Sx)
+#         x = self.convs(x)  # (B, FC_DIM, 1, Sx)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        OW = math.floor((W // 2 - self.WW // 2) / (self.WS // 2) + 1)
+        x = self.conv4(x)
+        assert x.shape[-1] == OW
         x = x.squeeze(2).permute(0, 2, 1)  # (B, S, FC_DIM)
         x = F.relu(self.fc1(x))  # -> (B, S, FC_DIM)
         x = self.dropout(x)
