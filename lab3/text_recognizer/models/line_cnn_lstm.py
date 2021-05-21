@@ -27,7 +27,7 @@ class LineCNNLSTM(nn.Module):
         lstm_layers = self.args.get("lstm_layers", LSTM_LAYERS)
         lstm_dropout = self.args.get("lstm_dropout", LSTM_DROPOUT)
 
-        self.line_cnn = LineCNN(data_config=data_config, args=args)
+        self.line_cnn = LineCNN(data_config=data_config, args=args) # Intialize
         # LineCNN outputs (B, C, S) log probs, with C == num_classes
 
         self.lstm = nn.LSTM(
