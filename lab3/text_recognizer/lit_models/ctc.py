@@ -45,9 +45,12 @@ class CTCLitModel(BaseLitModel):  # pylint: disable=too-many-ancestors
 
         self.loss_fn = torch.nn.CTCLoss(zero_infinity=True)
         # https://pytorch.org/docs/stable/generated/torch.nn.CTCLoss.html
+        
+        self.val_acc = pl.metrics.Accuracy()
+        self.test_acc = pl.metrics.Accuracy()
 
         ignore_tokens = [start_index, end_index, self.padding_index]
-        self.val_cer = CharacterErrorRate(ignore_tokens)
+        self.val_cer = CharacterErrorRate(ignore_tokens) # defined by ourself => metrics.py
         self.test_cer = CharacterErrorRate(ignore_tokens)
 
     @staticmethod
@@ -68,7 +71,7 @@ class CTCLitModel(BaseLitModel):  # pylint: disable=too-many-ancestors
         logprobs = torch.log_softmax(logits, dim=1)
         B, _C, S = logprobs.shape
 
-        logprobs_for_loss = logprobs.permute(2, 0, 1)  # -> (S, B, C)
+        logprobs_for_loss = logprobs.permute(2, 0, 1)  # (B, C, S) -> (S, B, C)
 
         input_lengths = torch.ones(B).type_as(logprobs_for_loss).int() * S
         target_lengths = first_element(y, self.padding_index).type_as(y)
@@ -85,7 +88,7 @@ class CTCLitModel(BaseLitModel):  # pylint: disable=too-many-ancestors
         logprobs_for_loss = logprobs.permute(2, 0, 1)  # -> (S, B, C)
         input_lengths = torch.ones(B).type_as(logprobs_for_loss).int() * S  # All are max sequence length
         target_lengths = first_element(y, self.padding_index).type_as(y)  # Length is up to first padding token
-        loss = self.loss_fn(logprobs_for_loss, y, input_lengths, target_lengths)
+        loss = self.loss_fn(logprobs_for_loss, y, input_lengths, target_lengths) # Ground truth target lengths : exclude padding
         self.log("val_loss", loss, prog_bar=True)
 
         decoded = self.greedy_decode(logprobs, max_length=y.shape[1])
@@ -104,7 +107,7 @@ class CTCLitModel(BaseLitModel):  # pylint: disable=too-many-ancestors
         self.test_cer(decoded, y)
         self.log("test_cer", self.test_cer, on_step=False, on_epoch=True, prog_bar=True)
 
-    def greedy_decode(self, logprobs: torch.Tensor, max_length: int) -> torch.Tensor:
+    def greedy_decode(self, logprobs: torch.Tensor, max_length: int) -> torch.Tensor: ## Homework
         """
         Greedily decode sequences, collapsing repeated tokens, and removing the CTC blank token.
 
